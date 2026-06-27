@@ -1,0 +1,2901 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RealPrice PK — Compare Grocery Prices Across Pakistan</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  <style>
+    /* ══════════════════════════════════════════
+   TOKENS
+══════════════════════════════════════════ */
+    :root {
+      --blue: #2563EB;
+      --blue-dark: #1D4ED8;
+      --blue-light: #EFF6FF;
+      --blue-mid: #BFDBFE;
+      --cyan: #06B6D4;
+      --cyan-dark: #0891B2;
+      --cyan-light: #ECFEFF;
+      --navy: #0F172A;
+      --navy-2: #1E293B;
+      --navy-3: #334155;
+      --slate: #64748B;
+      --slate-light: #94A3B8;
+      --bg: #F8FAFC;
+      --bg-2: #F1F5F9;
+      --card: #FFFFFF;
+      --border: #E2E8F0;
+      --border-2: #CBD5E1;
+      --green: #10B981;
+      --green-light: #D1FAE5;
+      --red: #EF4444;
+      --red-light: #FEE2E2;
+      --amber: #F59E0B;
+      --amber-light: #FEF3C7;
+      --shadow-sm: 0 1px 3px rgba(15, 23, 42, .06), 0 1px 2px rgba(15, 23, 42, .04);
+      --shadow: 0 4px 16px rgba(15, 23, 42, .08), 0 1px 4px rgba(15, 23, 42, .04);
+      --shadow-lg: 0 12px 40px rgba(15, 23, 42, .12), 0 4px 12px rgba(15, 23, 42, .06);
+      --shadow-blue: 0 8px 30px rgba(37, 99, 235, .2);
+      --radius-sm: 6px;
+      --radius: 10px;
+      --radius-lg: 16px;
+      --radius-xl: 24px;
+      --font: 'Inter', system-ui, sans-serif;
+    }
+
+    [data-theme="dark"] {
+      --bg: #0B1120;
+      --bg-2: #0F172A;
+      --card: #1E293B;
+      --border: #334155;
+      --border-2: #475569;
+      --navy: #F8FAFC;
+      --navy-2: #E2E8F0;
+      --navy-3: #CBD5E1;
+      --slate: #94A3B8;
+      --slate-light: #64748B;
+      --blue-light: rgba(37, 99, 235, .12);
+      --blue-mid: rgba(37, 99, 235, .25);
+      --cyan-light: rgba(6, 182, 212, .1);
+      --green-light: rgba(16, 185, 129, .12);
+      --red-light: rgba(239, 68, 68, .12);
+      --amber-light: rgba(245, 158, 11, .12);
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--navy);
+      line-height: 1.6;
+      min-height: 100vh;
+      transition: background 0.25s, color 0.25s;
+      overflow-x: hidden;
+    }
+
+    /* ══════════════════════════════════════════
+   NAV
+══════════════════════════════════════════ */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(248, 250, 252, .85);
+      backdrop-filter: blur(20px) saturate(180%);
+      border-bottom: 1px solid var(--border);
+      padding: 0 clamp(16px, 4vw, 64px);
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: background 0.25s;
+    }
+
+    [data-theme="dark"] nav {
+      background: rgba(11, 17, 32, .85);
+    }
+
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 17px;
+      font-weight: 800;
+      text-decoration: none;
+      color: var(--navy);
+      letter-spacing: -0.4px;
+    }
+
+    .nav-logo-icon {
+      width: 30px;
+      height: 30px;
+      background: linear-gradient(135deg, var(--blue), var(--cyan));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .nav-logo span {
+      color: var(--blue);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 4px;
+    }
+
+    .nav-links a {
+      font-size: 13.5px;
+      color: var(--slate);
+      text-decoration: none;
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+
+    .nav-links a:hover {
+      color: var(--navy);
+      background: var(--bg-2);
+    }
+
+    @media(max-width:768px) {
+      .nav-links {
+        display: none;
+      }
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-btn {
+      height: 34px;
+      padding: 0 16px;
+      border-radius: 100px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+      font-family: var(--font);
+    }
+
+    .nav-btn-ghost {
+      background: transparent;
+      color: var(--slate);
+      border: 1px solid var(--border);
+    }
+
+    .nav-btn-ghost:hover {
+      color: var(--navy);
+      border-color: var(--border-2);
+    }
+
+    .nav-btn-blue {
+      background: var(--blue);
+      color: #fff;
+    }
+
+    .nav-btn-blue:hover {
+      background: var(--blue-dark);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-blue);
+    }
+
+    .theme-toggle {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      transition: all 0.2s;
+    }
+
+    .theme-toggle:hover {
+      background: var(--blue-light);
+      border-color: var(--blue-mid);
+    }
+
+    /* ══════════════════════════════════════════
+   TICKER BAR
+══════════════════════════════════════════ */
+    .ticker-bar {
+      background: var(--navy-2);
+      border-bottom: 1px solid var(--border);
+      height: 36px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+    }
+
+    [data-theme="dark"] .ticker-bar {
+      background: var(--navy);
+      border-bottom-color: var(--border);
+    }
+
+    .ticker-inner {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      animation: ticker 32s linear infinite;
+      white-space: nowrap;
+    }
+
+    @keyframes ticker {
+      from {
+        transform: translateX(0);
+      }
+
+      to {
+        transform: translateX(-50%);
+      }
+    }
+
+    .ticker-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 28px;
+      border-right: 1px solid rgba(255, 255, 255, .07);
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .ticker-label {
+      color: rgba(255, 255, 255, .4);
+    }
+
+    .ticker-price {
+      color: #fff;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .ticker-change {
+      font-size: 11px;
+      padding: 2px 7px;
+      border-radius: 100px;
+    }
+
+    .t-up {
+      background: rgba(239, 68, 68, .15);
+      color: #F87171;
+    }
+
+    .t-down {
+      background: rgba(16, 185, 129, .15);
+      color: #34D399;
+    }
+
+    .t-flat {
+      background: rgba(148, 163, 184, .1);
+      color: #94A3B8;
+    }
+
+    /* ══════════════════════════════════════════
+   HERO
+══════════════════════════════════════════ */
+    .hero {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: clamp(60px, 8vw, 110px) clamp(16px, 4vw, 64px) clamp(40px, 5vw, 70px);
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 80px;
+      align-items: center;
+    }
+
+    @media(max-width:900px) {
+      .hero {
+        grid-template-columns: 1fr;
+        gap: 50px;
+      }
+
+      .hero-preview {
+        order: -1;
+      }
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: var(--blue-light);
+      border: 1px solid var(--blue-mid);
+      color: var(--blue-dark);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 100px;
+      margin-bottom: 20px;
+      letter-spacing: 0.1px;
+    }
+
+    .hero-badge .live-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--blue);
+      border-radius: 50%;
+      animation: blink 1.8s ease-in-out infinite;
+    }
+
+    @keyframes blink {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1)
+      }
+
+      50% {
+        opacity: .4;
+        transform: scale(1.5)
+      }
+    }
+
+    .hero-h1 {
+      font-size: clamp(34px, 4.5vw, 56px);
+      font-weight: 900;
+      line-height: 1.07;
+      letter-spacing: -1.5px;
+      color: var(--navy);
+      margin-bottom: 20px;
+    }
+
+    .hero-h1 .gradient-text {
+      background: linear-gradient(135deg, var(--blue) 0%, var(--cyan) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-sub {
+      font-size: 17px;
+      color: var(--slate);
+      line-height: 1.7;
+      margin-bottom: 32px;
+      max-width: 480px;
+      font-weight: 400;
+    }
+
+    /* Hero search */
+    .hero-search-wrap {
+      margin-bottom: 32px;
+    }
+
+    .hero-search {
+      display: flex;
+      align-items: center;
+      background: var(--card);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      transition: border-color 0.2s, box-shadow 0.2s;
+      max-width: 500px;
+    }
+
+    .hero-search:focus-within {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, .1), var(--shadow);
+    }
+
+    .hero-search-icon {
+      padding: 0 14px 0 18px;
+      color: var(--slate-light);
+      flex-shrink: 0;
+    }
+
+    .hero-search input {
+      flex: 1;
+      height: 52px;
+      border: none;
+      background: transparent;
+      font-family: var(--font);
+      font-size: 15px;
+      color: var(--navy);
+      outline: none;
+    }
+
+    .hero-search input::placeholder {
+      color: var(--slate-light);
+    }
+
+    .hero-search-btn {
+      height: 52px;
+      padding: 0 22px;
+      margin: 4px;
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-family: var(--font);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .hero-search-btn:hover {
+      background: var(--blue-dark);
+    }
+
+    .quick-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-top: 12px;
+    }
+
+    .quick-chip {
+      font-size: 12.5px;
+      color: var(--slate);
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 5px 12px;
+      border-radius: 100px;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-weight: 500;
+    }
+
+    .quick-chip:hover {
+      color: var(--blue);
+      border-color: var(--blue-mid);
+      background: var(--blue-light);
+    }
+
+    /* Hero stats row */
+    .hero-stats {
+      display: flex;
+      gap: 28px;
+      flex-wrap: wrap;
+    }
+
+
+    .h-stat-num {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--navy);
+      letter-spacing: -0.8px;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .h-stat-label {
+      font-size: 12px;
+      color: var(--slate);
+      margin-top: 3px;
+      font-weight: 500;
+    }
+
+    .h-stat+.h-stat {
+      padding-left: 28px;
+      border-left: 1px solid var(--border);
+    }
+
+    /* ══════════════════════════════════════════
+   HERO PREVIEW CARD  ← SIGNATURE ELEMENT
+   Animated live comparison card with
+   a delta bar unique to price comparison
+══════════════════════════════════════════ */
+    .hero-preview {
+      position: relative;
+    }
+
+    .preview-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+      animation: float 5s ease-in-out infinite;
+    }
+
+    @keyframes float {
+
+      0%,
+      100% {
+        transform: translateY(0)
+      }
+
+      50% {
+        transform: translateY(-8px)
+      }
+    }
+
+    .preview-card-header {
+      background: var(--navy);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    [data-theme="dark"] .preview-card-header {
+      background: #070D1A;
+    }
+
+    .preview-card-title {
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .live-badge {
+      background: rgba(16, 185, 129, .15);
+      border: 1px solid rgba(16, 185, 129, .3);
+      color: #34D399;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 100px;
+      letter-spacing: 0.5px;
+    }
+
+    .preview-product {
+      padding: 16px 20px 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .preview-product-icon {
+      width: 44px;
+      height: 44px;
+      background: var(--blue-light);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+
+    .preview-product-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--navy);
+    }
+
+    .preview-product-sub {
+      font-size: 12px;
+      color: var(--slate);
+      margin-top: 2px;
+    }
+
+    /* Delta bar — THE signature element */
+    .delta-bars {
+      padding: 14px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .delta-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .delta-store {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--slate);
+      width: 72px;
+      flex-shrink: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .delta-bar-track {
+      flex: 1;
+      height: 6px;
+      background: var(--bg-2);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .delta-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 1.2s cubic-bezier(.25, .46, .45, .94);
+    }
+
+    .delta-price {
+      font-size: 13px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      width: 58px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .delta-best-tag {
+      font-size: 10px;
+      font-weight: 700;
+      background: var(--green-light);
+      color: var(--green);
+      padding: 2px 7px;
+      border-radius: 100px;
+      flex-shrink: 0;
+    }
+
+    .delta-spacer {
+      width: 50px;
+      flex-shrink: 0;
+    }
+
+    .preview-footer {
+      padding: 12px 20px;
+      background: var(--blue-light);
+      border-top: 1px solid var(--blue-mid);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    [data-theme="dark"] .preview-footer {
+      background: rgba(37, 99, 235, .08);
+      border-top-color: rgba(37, 99, 235, .15);
+    }
+
+    .preview-footer-text {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--blue-dark);
+    }
+
+    .preview-footer-save {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--blue);
+      letter-spacing: -0.5px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    [data-theme="dark"] .preview-footer-text {
+      color: #93C5FD;
+    }
+
+    [data-theme="dark"] .preview-footer-save {
+      color: #60A5FA;
+    }
+
+    /* Floating accent chips */
+    .float-chip {
+      position: absolute;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 14px;
+      box-shadow: var(--shadow);
+      white-space: nowrap;
+    }
+
+    .float-chip-a {
+      top: -18px;
+      right: 16px;
+      animation: float2 4s ease-in-out 0.5s infinite;
+    }
+
+    .float-chip-b {
+      bottom: -14px;
+      left: -16px;
+      animation: float2 4.5s ease-in-out 1.2s infinite;
+    }
+
+    @keyframes float2 {
+
+      0%,
+      100% {
+        transform: translateY(0) rotate(-1deg)
+      }
+
+      50% {
+        transform: translateY(-7px) rotate(-1deg)
+      }
+    }
+
+    .float-chip-label {
+      font-size: 11px;
+      color: var(--slate);
+    }
+
+    .float-chip-val {
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--green);
+      letter-spacing: -0.5px;
+    }
+
+    /* ══════════════════════════════════════════
+   SEARCH RESULTS DASHBOARD
+══════════════════════════════════════════ */
+    #results-area {
+      display: none;
+    }
+
+    #results-area.visible {
+      display: block;
+    }
+
+    .results-wrapper {
+      border-top: 1px solid var(--border);
+      background: var(--bg-2);
+    }
+
+    .results-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 32px clamp(16px, 4vw, 64px);
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 24px;
+      align-items: start;
+    }
+
+    @media(max-width:900px) {
+      .results-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Skeleton loaders */
+    .skeleton {
+      background: linear-gradient(90deg, var(--border) 25%, var(--bg-2) 50%, var(--border) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+      border-radius: var(--radius-sm);
+    }
+
+    @keyframes shimmer {
+      to {
+        background-position: -200% 0;
+      }
+    }
+
+    .skeleton-line {
+      height: 14px;
+      margin-bottom: 8px;
+    }
+
+    .skeleton-block {
+      height: 60px;
+      margin-bottom: 10px;
+    }
+
+    /* Result header */
+    .res-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .res-icon {
+      width: 50px;
+      height: 50px;
+      background: var(--blue-light);
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      flex-shrink: 0;
+      border: 1px solid var(--blue-mid);
+    }
+
+    .res-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--navy);
+      letter-spacing: -0.4px;
+    }
+
+    .res-sub {
+      font-size: 13px;
+      color: var(--slate);
+      margin-top: 3px;
+    }
+
+    /* Savings banner */
+    .savings-banner {
+      background: linear-gradient(135deg, var(--blue) 0%, var(--cyan-dark) 100%);
+      border-radius: var(--radius-lg);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow-blue);
+    }
+
+    .savings-banner-icon {
+      font-size: 28px;
+      flex-shrink: 0;
+    }
+
+    .savings-big {
+      font-size: 19px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -0.3px;
+    }
+
+    .savings-small {
+      font-size: 12px;
+      color: rgba(255, 255, 255, .7);
+      margin-top: 3px;
+    }
+
+    /* Store cards */
+    .store-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .store-card {
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 14px 18px;
+      display: grid;
+      grid-template-columns: auto 1fr auto auto;
+      gap: 14px;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+
+    .store-card:hover {
+      border-color: var(--blue-mid);
+      box-shadow: var(--shadow);
+      transform: translateX(2px);
+    }
+
+    .store-card.best {
+      border-color: var(--blue);
+      background: var(--blue-light);
+    }
+
+    [data-theme="dark"] .store-card.best {
+      background: rgba(37, 99, 235, .1);
+    }
+
+    .store-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+
+    .store-info {
+      min-width: 0;
+    }
+
+    .store-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--navy);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .store-loc {
+      font-size: 12px;
+      color: var(--slate);
+      margin-top: 2px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .store-price {
+      font-size: 20px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.5px;
+    }
+
+    .store-trend {
+      font-size: 11.5px;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 100px;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .trend-down-chip {
+      background: var(--green-light);
+      color: var(--green);
+    }
+
+    .trend-up-chip {
+      background: var(--red-light);
+      color: var(--red);
+    }
+
+    .trend-flat-chip {
+      background: var(--bg-2);
+      color: var(--slate);
+    }
+
+    .badge-best-s {
+      background: var(--blue);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 100px;
+    }
+
+    .badge-exp-s {
+      background: var(--red-light);
+      color: var(--red);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 100px;
+    }
+
+    /* Chart card */
+    .chart-panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+    }
+
+    .chart-panel-title {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--navy);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .chart-legend {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      color: var(--slate);
+    }
+
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .s-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 18px;
+    }
+
+    .s-card-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .s-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+
+    .s-icon-blue {
+      background: var(--blue-light);
+    }
+
+    .s-icon-green {
+      background: var(--green-light);
+    }
+
+    .s-icon-amber {
+      background: var(--amber-light);
+    }
+
+    /* Best deal sidebar */
+    .best-deal-price {
+      font-size: 36px;
+      font-weight: 900;
+      letter-spacing: -1px;
+      color: var(--blue);
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+    }
+
+    .best-deal-savings {
+      font-size: 12.5px;
+      color: var(--slate);
+      margin-top: 4px;
+    }
+
+    .best-deal-year {
+      background: var(--green-light);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      margin-top: 12px;
+      font-size: 13px;
+      color: #065F46;
+      line-height: 1.5;
+    }
+
+    [data-theme="dark"] .best-deal-year {
+      background: rgba(16, 185, 129, .1);
+      color: #34D399;
+    }
+
+    .best-deal-year strong {
+      font-weight: 800;
+      font-size: 16px;
+    }
+
+    /* Alert input */
+    .s-input {
+      width: 100%;
+      height: 40px;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0 12px;
+      font-family: var(--font);
+      font-size: 14px;
+      color: var(--navy);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .s-input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, .08);
+    }
+
+    .s-btn {
+      width: 100%;
+      height: 38px;
+      margin-top: 8px;
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .s-btn:hover {
+      background: var(--blue-dark);
+    }
+
+    /* ══════════════════════════════════════════
+   STATS SECTION
+══════════════════════════════════════════ */
+    .stats-section {
+      background: var(--navy);
+      padding: clamp(40px, 5vw, 70px) clamp(16px, 4vw, 64px);
+    }
+
+    [data-theme="dark"] .stats-section {
+      background: #070D1A;
+    }
+
+    .stats-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1px;
+      background: rgba(255, 255, 255, .07);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+
+    .stat-block {
+      background: var(--navy-2);
+      padding: 28px 24px;
+      transition: background 0.2s;
+    }
+
+    .stat-block:hover {
+      background: var(--navy-3);
+    }
+
+    .stat-block-num {
+      font-size: 36px;
+      font-weight: 900;
+      letter-spacing: -1px;
+      color: #fff;
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+    }
+
+    .stat-block-num span {
+      font-size: 22px;
+      color: var(--cyan);
+    }
+
+    .stat-block-label {
+      font-size: 13px;
+      color: rgba(255, 255, 255, .45);
+      margin-top: 6px;
+      font-weight: 500;
+    }
+
+    .stat-block-delta {
+      font-size: 12px;
+      color: #34D399;
+      margin-top: 4px;
+    }
+
+    /* ══════════════════════════════════════════
+   FEATURES SECTION
+══════════════════════════════════════════ */
+    .features-section {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: clamp(50px, 6vw, 90px) clamp(16px, 4vw, 64px);
+    }
+
+    .section-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: var(--blue);
+      margin-bottom: 14px;
+    }
+
+    .section-eyebrow::before {
+      content: '';
+      display: block;
+      width: 24px;
+      height: 2px;
+      background: var(--blue);
+      border-radius: 1px;
+    }
+
+    .section-title {
+      font-size: clamp(26px, 3.5vw, 40px);
+      font-weight: 800;
+      letter-spacing: -1px;
+      color: var(--navy);
+      margin-bottom: 12px;
+      line-height: 1.1;
+    }
+
+    .section-sub {
+      font-size: 16px;
+      color: var(--slate);
+      max-width: 520px;
+      line-height: 1.7;
+      margin-bottom: 48px;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+    }
+
+    .feat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      transition: all 0.22s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feat-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(37, 99, 235, .03) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .feat-card:hover {
+      border-color: var(--blue-mid);
+      box-shadow: var(--shadow);
+      transform: translateY(-3px);
+    }
+
+    .feat-icon-wrap {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      font-size: 20px;
+    }
+
+    .feat-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 7px;
+    }
+
+    .feat-desc {
+      font-size: 13.5px;
+      color: var(--slate);
+      line-height: 1.65;
+    }
+
+    /* ══════════════════════════════════════════
+   AI OPTIMIZER
+══════════════════════════════════════════ */
+    .optimizer-section {
+      background: var(--bg-2);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .optimizer-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: clamp(50px, 6vw, 90px) clamp(16px, 4vw, 64px);
+    }
+
+    .optimizer-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+      margin-top: 40px;
+    }
+
+    .optimizer-header {
+      background: var(--navy);
+      padding: 18px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    [data-theme="dark"] .optimizer-header {
+      background: #070D1A;
+    }
+
+    .optimizer-header-title {
+      color: #fff;
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .ai-pill {
+      background: rgba(6, 182, 212, .15);
+      border: 1px solid rgba(6, 182, 212, .3);
+      color: var(--cyan);
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 100px;
+      font-weight: 600;
+    }
+
+    .optimizer-body {
+      padding: 28px;
+    }
+
+    .items-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--slate);
+      margin-bottom: 12px;
+    }
+
+    .item-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .item-pill {
+      background: var(--bg-2);
+      border: 1.5px solid var(--border);
+      border-radius: 100px;
+      padding: 7px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--navy-3);
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .item-pill.on {
+      background: var(--blue-light);
+      border-color: var(--blue);
+      color: var(--blue-dark);
+      font-weight: 600;
+    }
+
+    .item-pill.on .pill-x {
+      color: var(--blue);
+    }
+
+    .pill-x {
+      color: var(--slate-light);
+      font-size: 15px;
+      line-height: 1;
+    }
+
+    .opt-btn {
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      padding: 12px 24px;
+      border-radius: var(--radius);
+      font-family: var(--font);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      transition: all 0.2s;
+    }
+
+    .opt-btn:hover {
+      background: var(--blue-dark);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-blue);
+    }
+
+    .opt-btn:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .opt-result {
+      border-top: 1px solid var(--border);
+      padding-top: 24px;
+      margin-top: 24px;
+      display: none;
+    }
+
+    .opt-result.show {
+      display: block;
+    }
+
+    .opt-result-label {
+      font-size: 12px;
+      color: var(--slate);
+      margin-bottom: 14px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .opt-rows {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .opt-row {
+      display: grid;
+      grid-template-columns: 20px 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 12px 16px;
+      background: var(--bg);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+
+    .opt-check {
+      color: var(--green);
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .opt-product-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--navy);
+    }
+
+    .opt-product-store {
+      font-size: 12px;
+      color: var(--slate);
+      margin-top: 2px;
+    }
+
+    .opt-save {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--green);
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .opt-save small {
+      display: block;
+      font-size: 11px;
+      color: var(--slate);
+      font-weight: 400;
+    }
+
+    .opt-total {
+      background: linear-gradient(135deg, var(--blue) 0%, var(--cyan-dark) 100%);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 12px;
+    }
+
+    .opt-total-label {
+      font-size: 13px;
+      color: rgba(255, 255, 255, .8);
+      font-weight: 500;
+    }
+
+    .opt-total-val {
+      font-size: 24px;
+      font-weight: 900;
+      color: #fff;
+      letter-spacing: -0.5px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ══════════════════════════════════════════
+   STORES SECTION
+══════════════════════════════════════════ */
+    .stores-section {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: clamp(50px, 6vw, 90px) clamp(16px, 4vw, 64px);
+    }
+
+    .stores-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+      margin-top: 40px;
+    }
+
+    .store-partner-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px 20px;
+      text-align: center;
+      transition: all 0.2s;
+      cursor: default;
+    }
+
+    .store-partner-card:hover {
+      border-color: var(--blue-mid);
+      box-shadow: var(--shadow);
+      transform: translateY(-2px);
+    }
+
+    .store-partner-icon {
+      font-size: 32px;
+      margin-bottom: 12px;
+    }
+
+    .store-partner-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 4px;
+    }
+
+    .store-partner-tag {
+      font-size: 12px;
+      color: var(--slate);
+    }
+
+    .store-partner-products {
+      display: inline-block;
+      margin-top: 10px;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 100px;
+      background: var(--blue-light);
+      color: var(--blue-dark);
+    }
+
+    /* ══════════════════════════════════════════
+   TESTIMONIALS
+══════════════════════════════════════════ */
+    .testimonials-section {
+      background: var(--bg-2);
+      border-top: 1px solid var(--border);
+    }
+
+    .testimonials-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: clamp(50px, 6vw, 90px) clamp(16px, 4vw, 64px);
+    }
+
+    .testi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 40px;
+    }
+
+    .testi-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 22px;
+      transition: box-shadow 0.2s;
+    }
+
+    .testi-card:hover {
+      box-shadow: var(--shadow);
+    }
+
+    .testi-stars {
+      color: #FBBF24;
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+
+    .testi-quote {
+      font-size: 14px;
+      color: var(--navy-3);
+      line-height: 1.65;
+      margin-bottom: 16px;
+    }
+
+    .testi-author {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .testi-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .testi-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--navy);
+    }
+
+    .testi-loc {
+      font-size: 12px;
+      color: var(--slate);
+    }
+
+    .testi-savings {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--green);
+      margin-top: 2px;
+    }
+
+    /* ══════════════════════════════════════════
+   FOOTER
+══════════════════════════════════════════ */
+    footer {
+      background: var(--navy);
+      padding: clamp(32px, 4vw, 56px) clamp(16px, 4vw, 64px) 28px;
+    }
+
+    [data-theme="dark"] footer {
+      background: #070D1A;
+    }
+
+    .footer-top {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1.5fr repeat(3, 1fr);
+      gap: 48px;
+      margin-bottom: 40px;
+    }
+
+    @media(max-width:768px) {
+      .footer-top {
+        grid-template-columns: 1fr 1fr;
+        gap: 32px;
+      }
+    }
+
+
+    .footer-logo-text {
+      font-size: 18px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -0.4px;
+      margin-bottom: 10px;
+    }
+
+    .footer-logo-text span {
+      color: var(--cyan);
+    }
+
+    .footer-tagline {
+      font-size: 13px;
+      color: rgba(255, 255, 255, .4);
+      line-height: 1.6;
+      max-width: 240px;
+    }
+
+    .footer-col-title {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: rgba(255, 255, 255, .35);
+      margin-bottom: 14px;
+    }
+
+    .footer-links {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .footer-links a {
+      font-size: 13.5px;
+      color: rgba(255, 255, 255, .5);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+
+    .footer-links a:hover {
+      color: #fff;
+    }
+
+    .footer-bottom {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding-top: 24px;
+      border-top: 1px solid rgba(255, 255, 255, .07);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .footer-copy {
+      font-size: 12.5px;
+      color: rgba(255, 255, 255, .3);
+    }
+
+    /* ══════════════════════════════════════════
+   LOADING OVERLAY
+══════════════════════════════════════════ */
+    .loader-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(11, 17, 32, .55);
+      backdrop-filter: blur(12px);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .loader-overlay.show {
+      display: flex;
+    }
+
+    .loader-spinner {
+      width: 44px;
+      height: 44px;
+      border: 3px solid rgba(37, 99, 235, .2);
+      border-top-color: var(--blue);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .loader-text {
+      color: #fff;
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .loader-sub {
+      color: rgba(255, 255, 255, .45);
+      font-size: 13px;
+    }
+
+    /* Skeleton placeholder row */
+    .skel-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .skel-av {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-sm);
+      flex-shrink: 0;
+    }
+
+    .skel-lines {
+      flex: 1;
+    }
+
+    /* ══════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════ */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 90;
+      background: var(--navy);
+      border: 1px solid rgba(37, 99, 235, .3);
+      border-radius: var(--radius-lg);
+      padding: 14px 18px;
+      box-shadow: var(--shadow-lg);
+      max-width: 300px;
+      display: none;
+      animation: toastIn .3s ease;
+    }
+
+    @keyframes toastIn {
+      from {
+        opacity: 0;
+        transform: translateY(14px)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    .toast-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #93C5FD;
+      margin-bottom: 3px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .toast-body {
+      font-size: 13px;
+      color: rgba(255, 255, 255, .6);
+      line-height: 1.5;
+    }
+
+    .toast-x {
+      cursor: pointer;
+      color: rgba(255, 255, 255, .35);
+      font-size: 14px;
+    }
+
+    /* ══════════════════════════════════════════
+   SCAN MODAL
+══════════════════════════════════════════ */
+    .modal-bg {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(11, 17, 32, .6);
+      backdrop-filter: blur(12px);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-bg.show {
+      display: flex;
+    }
+
+    .modal-box {
+      background: var(--card);
+      border-radius: var(--radius-xl);
+      padding: 32px;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+      animation: modalIn .22s ease;
+    }
+
+    @keyframes modalIn {
+      from {
+        opacity: 0;
+        scale: .95
+      }
+
+      to {
+        opacity: 1;
+        scale: 1
+      }
+    }
+
+    .modal-close-btn {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      font-size: 14px;
+      color: var(--slate);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--navy);
+      margin-bottom: 6px;
+      text-align: center;
+    }
+
+    .modal-sub {
+      font-size: 14px;
+      color: var(--slate);
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .camera-box {
+      background: var(--bg-2);
+      border: 2px dashed var(--border-2);
+      border-radius: var(--radius-lg);
+      height: 160px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 18px;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .camera-box-text {
+      font-size: 13px;
+      color: var(--slate);
+    }
+
+    .demo-barcodes {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .demo-bc {
+      font-size: 12.5px;
+      color: var(--slate);
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      border-radius: 100px;
+      cursor: pointer;
+      transition: all .15s;
+      font-weight: 500;
+    }
+
+    .demo-bc:hover {
+      color: var(--blue);
+      border-color: var(--blue-mid);
+      background: var(--blue-light);
+    }
+
+    /* ══════════════════════════════════════════
+   SCROLL REVEAL
+══════════════════════════════════════════ */
+    .reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity .5s ease, transform .5s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: none;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Loader -->
+  <div class="loader-overlay" id="loader">
+    <div class="loader-spinner"></div>
+    <div class="loader-text">Scanning prices…</div>
+    <div class="loader-sub">Checking 5 stores in Karachi</div>
+  </div>
+
+  <!-- Scan Modal -->
+  <div class="modal-bg" id="scanModal">
+    <div class="modal-box">
+      <button class="modal-close-btn" onclick="closeScan()">✕</button>
+      <div style="font-size:40px;text-align:center;margin-bottom:12px;">📷</div>
+      <div class="modal-title">Scan Barcode</div>
+      <div class="modal-sub">Point your camera at any product barcode to instantly compare prices</div>
+      <div class="camera-box">
+        <div style="font-size:36px">⬜</div>
+        <div class="camera-box-text">Camera preview will appear here</div>
+      </div>
+      <div style="font-size:12px;color:var(--slate);text-align:center;margin-bottom:10px;">Try a demo product:</div>
+      <div class="demo-barcodes">
+        <button class="demo-bc" onclick="demoScan('Sprite 500ml')">🥤 Sprite</button>
+        <button class="demo-bc" onclick="demoScan('Nestle Milk 1L')">🥛 Nestle Milk</button>
+        <button class="demo-bc" onclick="demoScan('Shan Biryani Masala')">🌶️ Shan Masala</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast">
+    <div class="toast-title">
+      <span id="toast-title">Price found!</span>
+      <span class="toast-x" onclick="this.closest('.toast').style.display='none'">✕</span>
+    </div>
+    <div class="toast-body" id="toast-body"></div>
+  </div>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-left">
+      <a class="nav-logo" href="#">
+        <div class="nav-logo-icon">RP</div>
+        <span>Real Price PK</span>
+      </a>
+      <div class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#optimizer">AI Optimizer</a>
+        <a href="#stores">Stores</a>
+      </div>
+    </div>
+    <div class="nav-right">
+      <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode" id="themeBtn">🌙</button>
+      <button class="nav-btn nav-btn-ghost" onclick="openScan()">📷 Scan</button>
+      <button class="nav-btn nav-btn-blue"
+        onclick="document.getElementById('heroInput').focus(); document.querySelector('.hero-search').scrollIntoView({behavior:'smooth'})">Compare
+        Prices</button>
+    </div>
+  </nav>
+
+  <!-- TICKER -->
+  <div class="ticker-bar">
+    <div class="ticker-inner" id="ticker"></div>
+  </div>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-text">
+      <div class="hero-badge"><span class="live-dot"></span> Live prices · Updated daily</div>
+      <h1 class="hero-h1">Compare Grocery Prices Across <span class="gradient-text">Pakistan's Top Supermarkets</span>
+      </h1>
+      <p class="hero-sub">Stop guessing which store is cheaper. See real prices from Imtiaz, Carrefour, Metro,
+        Hyperstar, and Ansar side-by-side — and save up to Rs. 5,000 every month.</p>
+
+      <div class="hero-search-wrap">
+        <div class="hero-search">
+          <div class="hero-search-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8" />
+              <path d="m21 21-4.35-4.35" />
+            </svg>
+          </div>
+          <input type="text" id="heroInput" placeholder="Search products — e.g. Sprite 500ml, Shan Masala…"
+            autocomplete="off">
+          <button class="hero-search-btn" onclick="doSearch(document.getElementById('heroInput').value)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <circle cx="11" cy="11" r="8" />
+              <path d="m21 21-4.35-4.35" />
+            </svg>
+            Search
+          </button>
+        </div>
+        <div class="quick-chips">
+          <span style="font-size:12px;color:var(--slate-light);">Try:</span>
+          <span class="quick-chip" onclick="doSearch('Sprite 500ml')">🥤 Sprite 500ml</span>
+          <span class="quick-chip" onclick="doSearch('Nestle Milk 1L')">🥛 Nestle Milk</span>
+          <span class="quick-chip" onclick="doSearch('Shan Biryani Masala')">🌶️ Shan Masala</span>
+          <span class="quick-chip" onclick="doSearch('Sunsilk Shampoo 180ml')">💆 Sunsilk</span>
+          <span class="quick-chip" onclick="doSearch('Lipton Yellow Label 200g')">🍵 Lipton Tea</span>
+        </div>
+      </div>
+
+      <div class="hero-stats">
+        <div class="h-stat">
+          <div class="h-stat-num">2,400<span style="color:var(--blue)">+</span></div>
+          <div class="h-stat-label">Products tracked</div>
+        </div>
+        <div class="h-stat">
+          <div class="h-stat-num">5</div>
+          <div class="h-stat-label">Major store chains</div>
+        </div>
+        <div class="h-stat">
+          <div class="h-stat-num">Rs. 4.2k</div>
+          <div class="h-stat-label">Avg. monthly savings</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-preview">
+      <div class="float-chip float-chip-a">
+        <div class="float-chip-label">This month saved</div>
+        <div class="float-chip-val">Rs. 4,280</div>
+      </div>
+      <div class="float-chip float-chip-b">
+        <div class="float-chip-label">vs. Hyperstar</div>
+        <div class="float-chip-val" style="color:var(--cyan);">40% cheaper</div>
+      </div>
+
+      <div class="preview-card">
+        <div class="preview-card-header">
+          <div class="preview-card-title">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+            </svg>
+            Live Price Comparison
+          </div>
+          <div class="live-badge">LIVE</div>
+        </div>
+        <div class="preview-product">
+          <div class="preview-product-icon">🥤</div>
+          <div>
+            <div class="preview-product-name">Sprite 500ml PET Bottle</div>
+            <div class="preview-product-sub">Coca-Cola Pakistan · Beverages</div>
+          </div>
+        </div>
+        <div class="delta-bars" id="deltaBars">
+          <!-- Populated by JS -->
+        </div>
+        <div class="preview-footer">
+          <div class="preview-footer-text">Best price found at Carrefour</div>
+          <div class="preview-footer-save">Save Rs. 60</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULTS (hidden until search) -->
+  <div id="results-area">
+    <div class="results-wrapper">
+      <div class="results-container">
+        <!-- Main -->
+        <div id="results-main">
+          <div class="res-header">
+            <div class="res-icon" id="res-icon">🥤</div>
+            <div>
+              <div class="res-title" id="res-name">—</div>
+              <div class="res-sub" id="res-sub">—</div>
+            </div>
+          </div>
+
+          <div class="savings-banner">
+            <div class="savings-banner-icon">💰</div>
+            <div>
+              <div class="savings-big" id="savings-headline">—</div>
+              <div class="savings-small" id="savings-sub">—</div>
+            </div>
+          </div>
+
+          <div class="store-cards" id="storeCards"></div>
+
+          <div class="chart-panel">
+            <div class="chart-panel-title">
+              <span>30-day price history</span>
+            </div>
+            <div class="chart-legend" id="chartLegend"></div>
+            <div style="position:relative;height:200px;">
+              <canvas id="priceChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+          <div class="s-card">
+            <div class="s-card-title">
+              <div class="s-icon s-icon-blue">🏆</div> Best Deal Today
+            </div>
+            <div id="best-deal-content">—</div>
+          </div>
+          <div class="s-card">
+            <div class="s-card-title">
+              <div class="s-icon s-icon-amber">🔔</div> Price Alert
+            </div>
+            <p style="font-size:13px;color:var(--slate);margin-bottom:10px;">Get notified when this product drops below
+              your target.</p>
+            <input class="s-input" type="number" id="alertInput" placeholder="Target price (Rs.)">
+            <button class="s-btn" onclick="setAlert()">Set Alert</button>
+          </div>
+          <div class="s-card">
+            <div class="s-card-title">
+              <div class="s-icon s-icon-green">📋</div> Shopping List
+            </div>
+            <div id="shopping-list-content">
+              <p style="font-size:13px;color:var(--slate-light);">Your list is empty</p>
+            </div>
+            <button id="add-btn" onclick="addToList()"
+              style="width:100%;height:36px;margin-top:12px;background:var(--bg);color:var(--navy-3);border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;"
+              onmouseover="this.style.background='var(--blue-light)';this.style.borderColor='var(--blue-mid)'"
+              onmouseout="this.style.background='var(--bg)';this.style.borderColor='var(--border)'">+ Add to shopping
+              list</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-section">
+    <div class="stats-inner">
+      <div style="margin-bottom:28px;">
+        <div
+          style="font-size:12px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:6px;">
+          SmartPrice by the numbers</div>
+        <div style="font-size:28px;font-weight:800;color:#fff;letter-spacing:-0.8px;">Saving Pakistani families real
+          money</div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-block">
+          <div class="stat-block-num">2,400<span>+</span></div>
+          <div class="stat-block-label">Products tracked</div>
+          <div class="stat-block-delta">↑ 120 added last week</div>
+        </div>
+        <div class="stat-block">
+          <div class="stat-block-num">12k<span>+</span></div>
+          <div class="stat-block-label">Families using SmartPrice</div>
+          <div class="stat-block-delta">↑ 340 new this month</div>
+        </div>
+        <div class="stat-block">
+          <div class="stat-block-num">Rs. 4.2k</div>
+          <div class="stat-block-label">Average monthly savings</div>
+          <div class="stat-block-delta">↑ 8% vs last month</div>
+        </div>
+        <div class="stat-block">
+          <div class="stat-block-num">5</div>
+          <div class="stat-block-label">Store chains covered</div>
+          <div class="stat-block-delta">Lahore & Islamabad coming soon</div>
+        </div>
+        <div class="stat-block">
+          <div class="stat-block-num">98<span>%</span></div>
+          <div class="stat-block-label">Price accuracy rate</div>
+          <div class="stat-block-delta">Updated daily</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FEATURES -->
+  <div class="features-section reveal" id="features">
+    <div class="section-eyebrow">Features</div>
+    <div class="section-title">Everything you need to shop smarter</div>
+    <p class="section-sub">Built specifically for Pakistani grocery shoppers — no fluff, no paywalls, works on any
+      phone.</p>
+    <div class="features-grid">
+      <div class="feat-card">
+        <div class="feat-icon-wrap" style="background:var(--blue-light);">📊</div>
+        <div class="feat-title">Real-Time Price Comparison</div>
+        <div class="feat-desc">See prices from all 5 major store chains side by side, updated daily from their official
+          websites.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon-wrap" style="background:var(--cyan-light);">✨</div>
+        <div class="feat-title">AI Shopping Optimizer</div>
+        <div class="feat-desc">Tell us your weekly groceries — we calculate the cheapest route across stores and how
+          much you'll save.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon-wrap" style="background:var(--green-light);">🔔</div>
+        <div class="feat-title">Price Drop Alerts</div>
+        <div class="feat-desc">Set a target price for any product and get notified the moment it drops at any store in
+          your area.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon-wrap" style="background:var(--amber-light);">📈</div>
+        <div class="feat-title">Historical Price Trends</div>
+        <div class="feat-desc">30-day price history charts show you whether a deal is genuinely cheap or just a
+          marketing trick.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon-wrap" style="background:var(--blue-light);">📷</div>
+        <div class="feat-title">Barcode Scanner</div>
+        <div class="feat-desc">Scan any product's barcode in the supermarket to instantly pull up a price comparison
+          before you put it in your cart.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon-wrap" style="background:var(--green-light);">📱</div>
+        <div class="feat-title">Works on Any Phone</div>
+        <div class="feat-desc">No app download needed. Fully functional over 3G on the cheapest Android devices.
+          Designed for real Pakistan.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI OPTIMIZER -->
+  <div class="optimizer-section" id="optimizer">
+    <div class="optimizer-inner reveal">
+      <div class="section-eyebrow">AI Shopping Optimizer</div>
+      <div class="section-title">Your cheapest weekly route, calculated</div>
+      <p class="section-sub">Select what you buy weekly. Our AI finds the cheapest store for each item and totals your
+        savings in seconds.</p>
+
+      <div class="optimizer-card">
+        <div class="optimizer-header">
+          <div class="optimizer-header-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+            </svg>
+            Weekly Shopping Optimizer
+          </div>
+          <div class="ai-pill">Powered by AI</div>
+        </div>
+        <div class="optimizer-body">
+          <div class="items-label">Your weekly groceries — tap to select</div>
+          <div class="item-pills" id="itemPills">
+            <div class="item-pill on" data-item="Milk">🥛 Milk <span class="pill-x">×</span></div>
+            <div class="item-pill on" data-item="Eggs">🥚 Eggs <span class="pill-x">×</span></div>
+            <div class="item-pill on" data-item="Atta 5kg">🌾 Atta 5kg <span class="pill-x">×</span></div>
+            <div class="item-pill on" data-item="Rice">🍚 Rice <span class="pill-x">×</span></div>
+            <div class="item-pill on" data-item="Cooking Oil">🍶 Cooking Oil <span class="pill-x">×</span></div>
+            <div class="item-pill" data-item="Soft Drinks">🥤 Soft Drinks <span class="pill-x">×</span></div>
+            <div class="item-pill" data-item="Bread">🍞 Bread <span class="pill-x">×</span></div>
+            <div class="item-pill" data-item="Butter">🧈 Butter <span class="pill-x">×</span></div>
+          </div>
+          <button class="opt-btn" id="optBtn" onclick="runOptimizer()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+            </svg>
+            Generate savings plan
+          </button>
+          <div class="opt-result" id="optResult">
+            <div class="opt-result-label">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+              </svg>
+              Optimized shopping route for this week
+            </div>
+            <div class="opt-rows" id="optRows"></div>
+            <div class="opt-total">
+              <div class="opt-total-label">Total weekly savings vs. buying everything at Hyperstar</div>
+              <div class="opt-total-val" id="optTotal">Rs. 0</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STORES -->
+  <div class="stores-section reveal" id="stores">
+    <div class="section-eyebrow">Store Partners</div>
+    <div class="section-title">Prices from Pakistan's biggest chains</div>
+    <p class="section-sub">We track official prices published by each retailer and update them daily. No guesswork.</p>
+    <div class="stores-grid">
+      <div class="store-partner-card">
+        <div class="store-partner-icon">🛒</div>
+        <div class="store-partner-name">Imtiaz Super Market</div>
+        <div class="store-partner-tag">Karachi's most popular</div>
+        <div class="store-partner-products">620 products</div>
+      </div>
+      <div class="store-partner-card">
+        <div class="store-partner-icon">🏬</div>
+        <div class="store-partner-name">Carrefour</div>
+        <div class="store-partner-tag">International hypermarket</div>
+        <div class="store-partner-products">580 products</div>
+      </div>
+      <div class="store-partner-card">
+        <div class="store-partner-icon">📦</div>
+        <div class="store-partner-name">Metro Cash & Carry</div>
+        <div class="store-partner-tag">Bulk buying savings</div>
+        <div class="store-partner-products">490 products</div>
+      </div>
+      <div class="store-partner-card">
+        <div class="store-partner-icon">🌟</div>
+        <div class="store-partner-name">Hyperstar</div>
+        <div class="store-partner-tag">Premium retail chain</div>
+        <div class="store-partner-products">460 products</div>
+      </div>
+      <div class="store-partner-card">
+        <div class="store-partner-icon">🏪</div>
+        <div class="store-partner-name">Ansar Gallery</div>
+        <div class="store-partner-tag">Neighbourhood favourite</div>
+        <div class="store-partner-products">380 products</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TESTIMONIALS -->
+  <div class="testimonials-section">
+    <div class="testimonials-inner reveal">
+      <div class="section-eyebrow">Reviews</div>
+      <div class="section-title">What families across Karachi say</div>
+      <div class="testi-grid">
+        <div class="testi-card">
+          <div class="testi-stars">★★★★★</div>
+          <div class="testi-quote">"I used to think Carrefour was always the cheapest but SmartPrice showed me I was
+            wrong for half my groceries. The price history charts are what convinced me — I can see the pricing tricks
+            stores use."</div>
+          <div class="testi-author">
+            <div class="testi-avatar" style="background:var(--blue-light);">👩</div>
+            <div>
+              <div class="testi-name">Sana Mirza</div>
+              <div class="testi-loc">Defence Housing Authority</div>
+              <div class="testi-savings">Saves Rs. 3,800/month</div>
+            </div>
+          </div>
+        </div>
+        <div class="testi-card">
+          <div class="testi-stars">★★★★★</div>
+          <div class="testi-quote">"The AI optimizer changed our weekly shopping routine. It tells me to get milk from
+            Metro, rice from Imtiaz, and oil from Carrefour. Takes 30 seconds and saves us Rs. 650 every single week."
+          </div>
+          <div class="testi-author">
+            <div class="testi-avatar" style="background:var(--green-light);">👨</div>
+            <div>
+              <div class="testi-name">Usman Khalid</div>
+              <div class="testi-loc">North Nazimabad</div>
+              <div class="testi-savings">Saves Rs. 2,600/month</div>
+            </div>
+          </div>
+        </div>
+        <div class="testi-card">
+          <div class="testi-stars">★★★★★</div>
+          <div class="testi-quote">"Works perfectly on my basic Android even on slow internet. No app needed. I check it
+            before every shopping trip. The barcode scanner feature in the store itself is genuinely useful."</div>
+          <div class="testi-author">
+            <div class="testi-avatar" style="background:var(--amber-light);">👩</div>
+            <div>
+              <div class="testi-name">Farah Ahmed</div>
+              <div class="testi-loc">Orangi Town</div>
+              <div class="testi-savings">Saves Rs. 4,200/month</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-top">
+      <div class="footer-logo-wrap">
+        <div class="footer-logo-text">Smart<span>Price</span> PK</div>
+        <div class="footer-tagline">Know what you pay. Keep what you earn. Built for Pakistani families who want real
+          information, not marketing.</div>
+      </div>
+      <div>
+        <div class="footer-col-title">Product</div>
+        <div class="footer-links">
+          <a href="#features">Features</a>
+          <a href="#optimizer">AI Optimizer</a>
+          <a href="#stores">Store coverage</a>
+          <a href="#">Price alerts</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Stores</div>
+        <div class="footer-links">
+          <a href="#">Imtiaz</a>
+          <a href="#">Carrefour</a>
+          <a href="#">Metro</a>
+          <a href="#">Hyperstar</a>
+          <a href="#">Ansar Gallery</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Company</div>
+        <div class="footer-links">
+          <a href="#">About</a>
+          <a href="#">Data policy</a>
+          <a href="#">Contact</a>
+          <a href="#">Lahore launch →</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-copy">© 2026 SmartPrice PK. Prices are sourced from public store websites and updated daily.
+      </div>
+      <div style="font-size:12.5px;color:rgba(255,255,255,.3);">Made in Karachi 🇵🇰</div>
+    </div>
+  </footer>
+
+  <script>
+    /* ══════ DATA ══════ */
+    const PRODUCTS = {
+      "sprite 500ml": {
+        name: "Sprite 500ml PET Bottle", emoji: "🥤", sub: "Coca-Cola Pakistan · Beverages · Barcode: 5449000054227",
+        stores: [
+          { name: "Carrefour", short: "CF", color: "#2563EB", bg: "#EFF6FF", dist: "2.3 km", area: "Dolmen Mall", price: 90, trend: "down", trendAmt: -5 },
+          { name: "Metro Cash & Carry", short: "MT", color: "#0891B2", bg: "#ECFEFF", dist: "4.1 km", area: "Abul Hassan Isfahani Rd", price: 95, trend: "stable", trendAmt: 0 },
+          { name: "Imtiaz Super Market", short: "IM", color: "#10B981", bg: "#D1FAE5", dist: "3.5 km", area: "Nazimabad", price: 120, trend: "stable", trendAmt: 0 },
+          { name: "Ansar Gallery", short: "AN", color: "#7C3AED", bg: "#EDE9FE", dist: "1.8 km", area: "Tariq Road", price: 130, trend: "up", trendAmt: 10 },
+          { name: "Hyperstar", short: "HS", color: "#DC2626", bg: "#FEE2E2", dist: "6.2 km", area: "Lucky One Mall", price: 150, trend: "up", trendAmt: 15 },
+        ],
+        history: {
+          "Carrefour": [98, 97, 97, 95, 94, 94, 93, 95, 95, 94, 92, 91, 91, 92, 90, 90, 91, 90, 90, 89, 90, 91, 90, 90, 90, 90, 90, 90, 90, 90],
+          "Hyperstar": [135, 136, 137, 137, 138, 137, 136, 138, 140, 141, 142, 141, 140, 141, 142, 143, 143, 144, 144, 145, 145, 146, 146, 147, 148, 148, 149, 149, 150, 150],
+          "Metro Cash & Carry": [95, 96, 96, 96, 95, 95, 96, 96, 97, 96, 96, 96, 95, 95, 95, 95, 95, 95, 95, 95, 95, 95, 95, 95, 95, 95, 95, 95, 95, 95],
+        }
+      },
+      "nestle milk 1l": {
+        name: "Nestle Milk 1L UHT", emoji: "🥛", sub: "Nestle Pakistan · Dairy · Barcode: 6291003485959",
+        stores: [
+          { name: "Metro Cash & Carry", short: "MT", color: "#0891B2", bg: "#ECFEFF", dist: "4.1 km", area: "Abul Hassan Isfahani Rd", price: 185, trend: "stable", trendAmt: 0 },
+          { name: "Imtiaz Super Market", short: "IM", color: "#10B981", bg: "#D1FAE5", dist: "3.5 km", area: "Nazimabad", price: 190, trend: "down", trendAmt: -5 },
+          { name: "Carrefour", short: "CF", color: "#2563EB", bg: "#EFF6FF", dist: "2.3 km", area: "Dolmen Mall", price: 195, trend: "stable", trendAmt: 0 },
+          { name: "Ansar Gallery", short: "AN", color: "#7C3AED", bg: "#EDE9FE", dist: "1.8 km", area: "Tariq Road", price: 215, trend: "up", trendAmt: 10 },
+          { name: "Hyperstar", short: "HS", color: "#DC2626", bg: "#FEE2E2", dist: "6.2 km", area: "Lucky One Mall", price: 240, trend: "up", trendAmt: 25 },
+        ],
+        history: {
+          "Metro Cash & Carry": [190, 190, 189, 188, 188, 187, 187, 186, 186, 185, 185, 185, 185, 185, 185, 185, 185, 185, 185, 185, 185, 185, 185, 185, 185, 185, 185, 185, 185, 185],
+          "Hyperstar": [215, 216, 218, 218, 220, 220, 221, 222, 223, 224, 225, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239, 240, 240, 240, 240],
+          "Carrefour": [196, 196, 196, 195, 195, 195, 195, 195, 195, 195, 195, 195, 195, 195, 195, 195, 195, 195, 195, 195, 195, 195, 195, 195, 195, 195, 195, 195, 195, 195],
+        }
+      },
+      "shan biryani masala": {
+        name: "Shan Biryani Masala 60g", emoji: "🌶️", sub: "Shan Foods · Spices · Barcode: 6200001020034",
+        stores: [
+          { name: "Imtiaz Super Market", short: "IM", color: "#10B981", bg: "#D1FAE5", dist: "3.5 km", area: "Nazimabad", price: 65, trend: "stable", trendAmt: 0 },
+          { name: "Ansar Gallery", short: "AN", color: "#7C3AED", bg: "#EDE9FE", dist: "1.8 km", area: "Tariq Road", price: 68, trend: "stable", trendAmt: 0 },
+          { name: "Metro Cash & Carry", short: "MT", color: "#0891B2", bg: "#ECFEFF", dist: "4.1 km", area: "Abul Hassan Isfahani Rd", price: 70, trend: "down", trendAmt: -2 },
+          { name: "Carrefour", short: "CF", color: "#2563EB", bg: "#EFF6FF", dist: "2.3 km", area: "Dolmen Mall", price: 78, trend: "up", trendAmt: 5 },
+          { name: "Hyperstar", short: "HS", color: "#DC2626", bg: "#FEE2E2", dist: "6.2 km", area: "Lucky One Mall", price: 95, trend: "up", trendAmt: 8 },
+        ],
+        history: {
+          "Imtiaz Super Market": [67, 66, 66, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65],
+          "Hyperstar": [87, 87, 88, 88, 89, 89, 90, 90, 90, 91, 91, 91, 91, 92, 92, 92, 93, 93, 93, 93, 94, 94, 94, 95, 95, 95, 95, 95, 95, 95],
+          "Carrefour": [73, 73, 73, 73, 73, 73, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 74, 75, 75, 75, 77, 77, 78, 78, 78, 78, 78, 78, 78, 78],
+        }
+      },
+      "sunsilk shampoo 180ml": {
+        name: "Sunsilk Shampoo 180ml", emoji: "💆", sub: "Unilever Pakistan · Hair Care · Barcode: 6281006475010",
+        stores: [
+          { name: "Metro Cash & Carry", short: "MT", color: "#0891B2", bg: "#ECFEFF", dist: "4.1 km", area: "Abul Hassan Isfahani Rd", price: 320, trend: "stable", trendAmt: 0 },
+          { name: "Imtiaz Super Market", short: "IM", color: "#10B981", bg: "#D1FAE5", dist: "3.5 km", area: "Nazimabad", price: 335, trend: "down", trendAmt: -10 },
+          { name: "Ansar Gallery", short: "AN", color: "#7C3AED", bg: "#EDE9FE", dist: "1.8 km", area: "Tariq Road", price: 350, trend: "stable", trendAmt: 0 },
+          { name: "Carrefour", short: "CF", color: "#2563EB", bg: "#EFF6FF", dist: "2.3 km", area: "Dolmen Mall", price: 365, trend: "up", trendAmt: 15 },
+          { name: "Hyperstar", short: "HS", color: "#DC2626", bg: "#FEE2E2", dist: "6.2 km", area: "Lucky One Mall", price: 420, trend: "up", trendAmt: 20 },
+        ],
+        history: {
+          "Metro Cash & Carry": [330, 328, 326, 325, 324, 323, 322, 322, 321, 321, 321, 320, 320, 320, 320, 320, 320, 320, 320, 320, 320, 320, 320, 320, 320, 320, 320, 320, 320, 320],
+          "Hyperstar": [400, 402, 403, 405, 405, 406, 407, 408, 408, 409, 410, 410, 411, 412, 413, 414, 415, 415, 416, 417, 418, 418, 419, 420, 420, 420, 420, 420, 420, 420],
+          "Carrefour": [350, 350, 351, 352, 352, 352, 353, 354, 354, 355, 355, 356, 357, 358, 358, 359, 360, 361, 362, 362, 363, 364, 364, 365, 365, 365, 365, 365, 365, 365],
+        }
+      },
+      "lipton yellow label 200g": {
+        name: "Lipton Yellow Label Tea 200g", emoji: "🍵", sub: "Unilever Pakistan · Beverages · Barcode: 6281026475052",
+        stores: [
+          { name: "Carrefour", short: "CF", color: "#2563EB", bg: "#EFF6FF", dist: "2.3 km", area: "Dolmen Mall", price: 520, trend: "down", trendAmt: -20 },
+          { name: "Imtiaz Super Market", short: "IM", color: "#10B981", bg: "#D1FAE5", dist: "3.5 km", area: "Nazimabad", price: 545, trend: "stable", trendAmt: 0 },
+          { name: "Ansar Gallery", short: "AN", color: "#7C3AED", bg: "#EDE9FE", dist: "1.8 km", area: "Tariq Road", price: 560, trend: "up", trendAmt: 10 },
+          { name: "Metro Cash & Carry", short: "MT", color: "#0891B2", bg: "#ECFEFF", dist: "4.1 km", area: "Abul Hassan Isfahani Rd", price: 575, trend: "stable", trendAmt: 0 },
+          { name: "Hyperstar", short: "HS", color: "#DC2626", bg: "#FEE2E2", dist: "6.2 km", area: "Lucky One Mall", price: 650, trend: "up", trendAmt: 30 },
+        ],
+        history: {
+          "Carrefour": [545, 542, 540, 538, 535, 533, 530, 528, 526, 525, 524, 523, 522, 521, 521, 520, 520, 520, 520, 520, 520, 520, 520, 520, 520, 520, 520, 520, 520, 520],
+          "Hyperstar": [620, 622, 624, 625, 626, 628, 629, 630, 632, 633, 635, 636, 637, 638, 639, 640, 641, 642, 643, 644, 645, 646, 647, 648, 649, 650, 650, 650, 650, 650],
+          "Imtiaz Super Market": [548, 547, 546, 546, 545, 545, 545, 545, 545, 545, 545, 545, 545, 545, 545, 545, 545, 545, 545, 545, 545, 545, 545, 545, 545, 545, 545, 545, 545, 545],
+        }
+      },
+    };
+
+    const AI_DATA = {
+      "Milk": { store: "Metro Cash & Carry", price: 185, save: 55 },
+      "Eggs": { store: "Imtiaz Super Market", price: 380, save: 100 },
+      "Atta 5kg": { store: "Imtiaz Super Market", price: 620, save: 130 },
+      "Rice": { store: "Metro Cash & Carry", price: 240, save: 70 },
+      "Cooking Oil": { store: "Carrefour", price: 480, save: 80 },
+      "Soft Drinks": { store: "Carrefour", price: 90, save: 60 },
+      "Bread": { store: "Ansar Gallery", price: 95, save: 35 },
+      "Butter": { store: "Imtiaz Super Market", price: 340, save: 90 },
+    };
+    const EMOJIS = { "Milk": "🥛", "Eggs": "🥚", "Atta 5kg": "🌾", "Rice": "🍚", "Cooking Oil": "🍶", "Soft Drinks": "🥤", "Bread": "🍞", "Butter": "🧈" };
+
+    const TICKER_DATA = [
+      { label: "Sprite 500ml", store: "Carrefour", price: "Rs. 90", change: "down", val: "−5" },
+      { label: "Nestle Milk 1L", store: "Metro", price: "Rs. 185", change: "flat", val: "—" },
+      { label: "Shan Masala 60g", store: "Imtiaz", price: "Rs. 65", change: "down", val: "−2" },
+      { label: "Cooking Oil 5L", store: "Carrefour", price: "Rs. 2,100", change: "up", val: "+80" },
+      { label: "Sunsilk 180ml", store: "Metro", price: "Rs. 320", change: "down", val: "−10" },
+      { label: "Lipton Tea 200g", store: "Carrefour", price: "Rs. 520", change: "down", val: "−20" },
+      { label: "Atta 5kg", store: "Imtiaz", price: "Rs. 620", change: "flat", val: "—" },
+      { label: "Nurpur Butter 200g", store: "Imtiaz", price: "Rs. 340", change: "flat", val: "—" },
+    ];
+
+    let currentProduct = null;
+    let chartInstance = null;
+    let shoppingList = [];
+
+    /* ══════ INIT ══════ */
+    window.addEventListener('load', () => {
+      buildTicker();
+      buildDeltaBars();
+      setupScrollReveal();
+      setupPillToggle();
+
+      document.getElementById('heroInput').addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(e.target.value); });
+
+      // Show Sprite on load
+      setTimeout(() => {
+        renderResults(PRODUCTS["sprite 500ml"]);
+        document.getElementById('results-area').classList.add('visible');
+      }, 300);
+    });
+
+    /* ══════ TICKER ══════ */
+    function buildTicker() {
+      const el = document.getElementById('ticker');
+      const items = [...TICKER_DATA, ...TICKER_DATA]; // duplicate for seamless loop
+      el.innerHTML = items.map(t => {
+        const cls = t.change === 'down' ? 't-down' : t.change === 'up' ? 't-up' : 't-flat';
+        const arrow = t.change === 'down' ? '↓' : t.change === 'up' ? '↑' : '';
+        return `<div class="ticker-item">
+      <span class="ticker-label">${t.label} · ${t.store}</span>
+      <span class="ticker-price">${t.price}</span>
+      <span class="ticker-change ${cls}">${arrow}${t.val}</span>
+    </div>`;
+      }).join('');
+    }
+
+    /* ══════ DELTA BARS (hero preview) ══════ */
+    function buildDeltaBars() {
+      const data = [
+        { store: "Carrefour", price: 90, max: 150 },
+        { store: "Metro", price: 95, max: 150 },
+        { store: "Imtiaz", price: 120, max: 150 },
+        { store: "Ansar", price: 130, max: 150 },
+        { store: "Hyperstar", price: 150, max: 150 },
+      ];
+      const el = document.getElementById('deltaBars');
+      el.innerHTML = data.map((d, i) => {
+        const pct = Math.round((d.price / d.max) * 100);
+        const color = i === 0 ? '#10B981' : i === data.length - 1 ? '#EF4444' : '#2563EB';
+        const textColor = i === 0 ? '#059669' : i === data.length - 1 ? '#DC2626' : '#1D4ED8';
+        return `<div class="delta-row">
+      <div class="delta-store">${d.store}</div>
+      <div class="delta-bar-track"><div class="delta-bar-fill" style="width:${pct}%;background:${color};opacity:${i === 0 || i === data.length - 1 ? 1 : .6}"></div></div>
+      <div class="delta-price" style="color:${textColor}">Rs. ${d.price}</div>
+      ${i === 0 ? '<div class="delta-best-tag">Best</div>' : '<div class="delta-spacer"></div>'}
+    </div>`;
+      }).join('');
+    }
+
+    /* ══════ SEARCH ══════ */
+    function doSearch(raw) {
+      if (!raw || !raw.trim()) return;
+      const key = raw.trim().toLowerCase();
+      let found = null;
+      for (const [k, v] of Object.entries(PRODUCTS)) {
+        if (key.includes(k.split(' ')[0]) || k.includes(key.split(' ')[0])) { found = v; break; }
+      }
+      if (!found) found = { ...PRODUCTS["sprite 500ml"], name: raw + " (Demo data)", sub: "Demo mode — showing sample comparison data" };
+
+      document.getElementById('loader').classList.add('show');
+      setTimeout(() => {
+        document.getElementById('loader').classList.remove('show');
+        renderResults(found);
+        document.getElementById('results-area').classList.add('visible');
+        setTimeout(() => document.getElementById('results-area').scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+      }, 1100);
+    }
+
+    /* ══════ RENDER RESULTS ══════ */
+    function renderResults(product) {
+      currentProduct = product;
+      document.getElementById('res-icon').textContent = product.emoji;
+      document.getElementById('res-name').textContent = product.name;
+      document.getElementById('res-sub').textContent = product.sub;
+
+      const sorted = [...product.stores].sort((a, b) => a.price - b.price);
+      const best = sorted[0], worst = sorted[sorted.length - 1];
+      const saving = worst.price - best.price;
+
+      document.getElementById('savings-headline').textContent = `Save Rs. ${saving} per unit vs ${worst.name}`;
+      document.getElementById('savings-sub').textContent = `Buying 20 units/month at ${best.name} saves Rs. ${saving * 20} monthly`;
+
+      // Store cards
+      const cardsEl = document.getElementById('storeCards');
+      cardsEl.innerHTML = sorted.map((s, i) => {
+        const isBest = i === 0, isExp = i === sorted.length - 1;
+        const priceColor = isBest ? 'var(--green)' : isExp ? 'var(--red)' : 'var(--navy)';
+        const trendHtml = s.trend === 'down'
+          ? `<div class="store-trend trend-down-chip">↓ Rs. ${Math.abs(s.trendAmt)}</div>`
+          : s.trend === 'up'
+            ? `<div class="store-trend trend-up-chip">↑ Rs. ${s.trendAmt}</div>`
+            : `<div class="store-trend trend-flat-chip">— Stable</div>`;
+        const badge = isBest ? `<span class="badge-best-s">Cheapest</span>` : isExp ? `<span class="badge-exp-s">Priciest</span>` : '';
+        return `<div class="store-card ${isBest ? 'best' : ''}">
+      <div class="store-avatar" style="background:${s.bg};color:${s.color}">${s.short}</div>
+      <div class="store-info">
+        <div class="store-name">${s.name} ${badge}</div>
+        <div class="store-loc">📍 ${s.area} · ${s.dist}</div>
+      </div>
+      <div class="store-price" style="color:${priceColor}">Rs. ${s.price}</div>
+      ${trendHtml}
+    </div>`;
+      }).join('');
+
+      // Chart
+      buildChart(product, sorted);
+
+      // Sidebar best deal
+      document.getElementById('best-deal-content').innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+      <div style="width:38px;height:38px;border-radius:var(--radius-sm);background:${best.bg};color:${best.color};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;">${best.short}</div>
+      <div><div style="font-size:14px;font-weight:700;color:var(--navy)">${best.name}</div><div style="font-size:12px;color:var(--slate)">${best.area} · ${best.dist}</div></div>
+    </div>
+    <div class="best-deal-price">Rs. ${best.price}</div>
+    <div class="best-deal-savings">Rs. ${saving} cheaper than ${worst.name}</div>
+    <div class="best-deal-year">Buy weekly and save <strong>Rs. ${saving * 52}</strong> per year vs ${worst.name}</div>`;
+
+      showToast('Price found!', `${product.name}: cheapest at ${best.name} for Rs. ${best.price}`);
+      updateShoppingList();
+    }
+
+    /* ══════ CHART ══════ */
+    function buildChart(product, sorted) {
+      if (chartInstance) chartInstance.destroy();
+      const labels = Array.from({ length: 30 }, (_, i) => {
+        const d = new Date(2026, 3, 12 + i);
+        return `${d.getDate()}/${d.getMonth() + 1}`;
+      });
+      const palette = ['#2563EB', '#DC2626', '#0891B2', '#7C3AED', '#10B981'];
+      const stores = Object.keys(product.history);
+      const datasets = stores.map((name, i) => ({
+        label: name,
+        data: product.history[name],
+        borderColor: palette[i % palette.length],
+        borderWidth: 2,
+        pointRadius: 0,
+        tension: 0.3,
+        borderDash: i > 0 ? [4, 3] : [],
+      }));
+
+      document.getElementById('chartLegend').innerHTML = stores.map((name, i) =>
+        `<div class="legend-item"><div class="legend-dot" style="background:${palette[i]}"></div>${name.split(' ')[0]}</div>`
+      ).join('');
+
+      chartInstance = new Chart(document.getElementById('priceChart'), {
+        type: 'line', data: { labels, datasets },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: Rs. ${ctx.parsed.y}` } } },
+          scales: {
+            x: { grid: { display: false }, ticks: { maxTicksLimit: 6, color: '#94A3B8', font: { size: 11 }, autoSkip: true } },
+            y: { grid: { color: 'rgba(37,99,235,.07)' }, ticks: { color: '#94A3B8', font: { size: 11 }, callback: v => 'Rs.' + v } },
+          }
+        }
+      });
+    }
+
+    /* ══════ OPTIMIZER ══════ */
+    function setupPillToggle() {
+      document.getElementById('itemPills').addEventListener('click', e => {
+        const pill = e.target.closest('.item-pill');
+        if (pill) pill.classList.toggle('on');
+      });
+    }
+
+    function runOptimizer() {
+      const active = [...document.querySelectorAll('.item-pill.on')].map(p => p.dataset.item);
+      if (!active.length) return;
+      const btn = document.getElementById('optBtn');
+      btn.disabled = true;
+      btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin .7s linear infinite"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> Calculating…`;
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Generate savings plan`;
+        let total = 0;
+        const rows = active.map(item => {
+          const d = AI_DATA[item] || { store: 'Imtiaz Super Market', price: 100, save: 30 };
+          total += d.save;
+          return `<div class="opt-row">
+        <div class="opt-check">✓</div>
+        <div><div class="opt-product-name">${EMOJIS[item] || '🛒'} ${item}</div><div class="opt-product-store">→ Buy at <strong>${d.store}</strong> · Rs. ${d.price}/unit</div></div>
+        <div class="opt-save">Rs. ${d.save}<small>saved vs Hyperstar</small></div>
+      </div>`;
+        });
+        document.getElementById('optRows').innerHTML = rows.join('');
+        document.getElementById('optTotal').textContent = `Rs. ${total}`;
+        const res = document.getElementById('optResult');
+        res.classList.add('show');
+        res.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 1300);
+    }
+
+    /* ══════ SHOPPING LIST ══════ */
+    function addToList() {
+      if (!currentProduct) return;
+      if (!shoppingList.find(i => i.name === currentProduct.name)) {
+        shoppingList.push({ name: currentProduct.name, emoji: currentProduct.emoji });
+        updateShoppingList();
+        showToast('Added!', currentProduct.name + ' added to your list');
+      }
+    }
+
+    function updateShoppingList() {
+      const el = document.getElementById('shopping-list-content');
+      if (!shoppingList.length) { el.innerHTML = '<p style="font-size:13px;color:var(--slate-light)">Your list is empty</p>'; return; }
+      el.innerHTML = shoppingList.map(i => `
+    <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">
+      <span>${i.emoji}</span>
+      <span style="font-size:13px;color:var(--navy-3);flex:1">${i.name}</span>
+      <span style="font-size:11px;color:var(--green);font-weight:700">✓</span>
+    </div>`).join('')
+        + `<div style="font-size:12px;color:var(--slate);margin-top:8px">${shoppingList.length} item${shoppingList.length > 1 ? 's' : ''} · <a href="#optimizer" style="color:var(--blue);text-decoration:none;font-weight:600">Optimize route →</a></div>`;
+    }
+
+    /* ══════ ALERT ══════ */
+    function setAlert() {
+      const val = document.getElementById('alertInput').value;
+      if (!val || !currentProduct) return;
+      showToast('Alert set!', `We'll notify you when ${currentProduct.name.split(' ').slice(0, 3).join(' ')} drops below Rs. ${val}`);
+      document.getElementById('alertInput').value = '';
+    }
+
+    /* ══════ TOAST ══════ */
+    function showToast(title, body) {
+      document.getElementById('toast-title').textContent = title;
+      document.getElementById('toast-body').textContent = body;
+      const t = document.getElementById('toast');
+      t.style.display = 'block';
+      clearTimeout(window._tt);
+      window._tt = setTimeout(() => t.style.display = 'none', 4000);
+    }
+
+    /* ══════ SCAN MODAL ══════ */
+    function openScan() { document.getElementById('scanModal').classList.add('show'); }
+    function closeScan() { document.getElementById('scanModal').classList.remove('show'); }
+    function demoScan(term) { closeScan(); doSearch(term); }
+    document.getElementById('scanModal').addEventListener('click', e => { if (e.target === document.getElementById('scanModal')) closeScan(); });
+
+    /* ══════ DARK MODE ══════ */
+    function toggleTheme() {
+      const html = document.documentElement;
+      const isDark = html.getAttribute('data-theme') === 'dark';
+      html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+      document.getElementById('themeBtn').textContent = isDark ? '🌙' : '☀️';
+    }
+
+    /* ══════ SCROLL REVEAL ══════ */
+    function setupScrollReveal() {
+      const obs = new IntersectionObserver(entries => {
+        entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+      }, { threshold: 0.12 });
+      document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+    }
+  </script>
+</body>
+
+</html>
